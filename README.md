@@ -2,6 +2,8 @@
 
 This project aims to provide an easy way to compile [Markdown](https://github.github.com/gfm/) files to HTML. It will generate a fully functional HTML page with CSS similar to [GitHubs' markdown](https://github.com/sindresorhus/github-markdown-css). The generated HTML files are placed inside an dedicated folder to be served by a web server, allowing for example a deployment of [GithHub Pages](https://pages.github.com/).
 
+A deployed example can be found [here](https://diba1013.github.io/markdown-to-html/).
+
 ## Installation
 
 This project requires [Node.js](https://nodejs.org/) to run, however [Yarn](https://yarnpkg.com) is the prefered package manager. To execute the compilation step, [gulp](https://gulpjs.com/) is used. Note that not all gulp tasks are exposed to Node.js; it is adviced to use a task detector or to look into [`gulpfile.js`](./gulpfile.js) for available tasks.
