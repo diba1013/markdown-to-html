@@ -8,3 +8,11 @@ before_script:
   - yarn global add gulp-cli
 
 script: gulp install
+
+deploy:
+  provider: pages
+  github_token: $GITHUB_TOKEN
+  skip_cleanup: true
+  local_dir: docs
+  on:
+    branch: master
