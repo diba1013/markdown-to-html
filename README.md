@@ -10,20 +10,35 @@ This project requires [Node.js](https://nodejs.org/) to run, however [Yarn](http
 
 *This project is designed to be used within Visual Studio Code, so that you may easily execute the defined gulp tasks.*
 
+```sh
+yarn install
+yarn upgrade --latest
+yarn run build
+```
+
 ## Configuration
 
 This projects' configuration is available in [`config.json`](./config.json). 
 
-| Config      | Type        | Description                                                                            |
-| :---------- | :---------- | :------------------------------------------------------------------------------------- |
-| root        | `string`    | The directory of the markdown and assets files.                                        |
-| out         | `string`    | The output directory where the `${src}` are compiled to. This directory can be served. |
-| standalone  | `bool`      | If a standalone HTML without dependencies should be generated.                         |
-| files       | `Article[]` | The markdown files to be compiled to HTML.                                             |
-|             |             |                                                                                        |
-| **Article** |             |                                                                                        |
-| title       | `string`    | The title of the article displayed in HTML.                                            |
-| name        | `string`    | The name of the file without extension.                                                |
+| Config       | Type                    | Description                                                                                                                                                                                                                                                                                                                       |
+| :----------- | :---------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| root         | `string`                | The directory of the markdown and assets files.                                                                                                                                                                                                                                                                                   |
+| out          | `string`                | The output directory where the `${root}` is compiled to. This directory can be served. For serving GitHub Pages, it is recommended to name this the same name as the repository and starting the webserver in the project root. This simulates the behaviour of GitHub Pages and ensures that the files are correctly referenced. |
+| server       | `Server`                | The configuration for the web server, the files are served on. Used for referencing external files (stylesheet, ...).                                                                                                                                                                                                             |
+| standalone   | `bool`                  | If a standalone HTML without dependencies should be generated.                                                                                                                                                                                                                                                                    |
+| files        | `Category[]`            | The markdown files to be compiled to HTML.                                                                                                                                                                                                                                                                                        |
+|              |                         |                                                                                                                                                                                                                                                                                                                                   |
+| **Server**   |                         |                                                                                                                                                                                                                                                                                                                                   |
+| path         | `string` or `undefined` | The path of the server to serve on. For GitHub Pages, it is recommended to name this `/${repository.name}` (similarily to `out`) to ensure that files are referenced from the server root, instead of relatively. This is most important for categories to find the global files correctly.                                       |
+|              |                         |                                                                                                                                                                                                                                                                                                                                   |
+| **Category** |                         |                                                                                                                                                                                                                                                                                                                                   |
+| name         | `string`                | The name of the category. This is used to store the articles within this directory `${server.root}/${category.name}/${article.name}.html`.                                                                                                                                                                                        |
+| root         | `string` or `undefined` | The root path of the category. If specified, this must be placed within `${project.root}/${category.root}/`. It may only be ommited once (such as for `index` in the example) in which case the root is used from `${project.root}/src`.                                                                                          |
+| files        | `Article[]`             | The articles specified for this category. They must be placed in `${project.root}/${category.root}/*.md`                                                                                                                                                                                                                          |
+|              |                         |                                                                                                                                                                                                                                                                                                                                   |
+| **Article**  |                         |                                                                                                                                                                                                                                                                                                                                   |
+| title        | `string`                | The title of the article displayed in HTML.                                                                                                                                                                                                                                                                                       |
+| name         | `string`                | The name of the file without extension.                                                                                                                                                                                                                                                                                           |
 
 #### Files
 
