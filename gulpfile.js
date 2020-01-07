@@ -81,34 +81,39 @@ function read(path) {
     return undefined;
 }
 
-function name(task, name) {
+// Helper
+
+function public(name, task) {
+    gulp.task(name, task); // Note that this is deprecated, however, the actual usage below does not work
+    //exports[name] = task;
+}
+
+function private(name, task) {
     task.displayName = name;
     return task;
 }
 
 function copy(src, dest, alt) {
-    return name(
-        () => gulp.src(src).pipe(gulp.dest(dest)),
-        "copy:" + (alt ? alt : ` "${src}" to "${dest}"`)
+    return private(
+        "copy:" + (alt === undefined ? ` "${src}" to "${dest}"` : alt),
+        () => gulp.src(src).pipe(gulp.dest(dest))
     );
 }
 
 function clean(src, alt) {
-    return name(
-        () => del(src, {
-            force: true
-        }),
-        "clean:" + (alt ? alt : ` "${src}"`)
+    return private(
+        "clean:" + (alt === undefined ? ` "${src}"` : alt),
+        () => del(src, { force: true })
     );
 }
 
 // Misc
 
-gulp.task("copy:img", copy(src.images, out.images, "img"))
+public("copy:img", copy(src.images, out.images, "img"))
 
 // CSS
 
-gulp.task("compile:css", () => {
+public("compile:css", () => {
     return gulp.src(src.css)
         .pipe(sass(options.sass))
         .pipe(csso())
@@ -118,16 +123,19 @@ gulp.task("compile:css", () => {
 // Markdown to HTML
 
 function compileMarkdown(article) {
-    return name(
-        () => gulp.src(article.src)
-            .pipe(markdown(options.markdown))
-            .pipe(gulp.dest(out.raw)),
-        `compile:html:${article.name}`
+    return private(
+        `compile:html:${article.name}`,
+        () => {
+            return gulp.src(article.src)
+                .pipe(markdown(options.markdown))
+                .pipe(gulp.dest(out.raw))
+        }
     )
 }
 
 function injectHTML(article) {
-    return name(
+    return private(
+        `build:html:${article.name}`,
         () => {
             const engine = handlebars()
                 .partials(src.handlebars.partials)
@@ -154,12 +162,11 @@ function injectHTML(article) {
             }
 
             return template;
-        },
-        `build:html:${article.name}`
+        }
     )
 }
 
-gulp.task("build:md", gulp.parallel(
+public("build:md", gulp.parallel(
     articles.map(article => {
         return gulp.series(
             compileMarkdown(article),
@@ -170,9 +177,9 @@ gulp.task("build:md", gulp.parallel(
 
 // Global
 
-gulp.task("clean", clean(out.root));
+public("clean", clean(out.root));
 
-gulp.task("watch", () => {
+public("watch", () => {
     return gulp.watch([
         `${src.markdown}/*.md`,
         src.template,
@@ -181,9 +188,9 @@ gulp.task("watch", () => {
     ], gulp.series("build"))
 });
 
-gulp.task("build", gulp.series(
+public("build", gulp.series(
     gulp.parallel("copy:img", "compile:css"), // Ensure these compiled files are available for markdown html
     "build:md"
 ));
 
-gulp.task("install", gulp.series("clean", "build"));
+public("install", gulp.series("clean", "build"));
