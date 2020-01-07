@@ -1,6 +1,9 @@
 {
     "root": "src",
     "out": "markdown-to-html",
+    "server": {
+        "path": "/markdown-to-html"
+    },
     "standalone": false,
     "categories": [
         {
