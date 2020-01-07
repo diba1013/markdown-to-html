@@ -1,0 +1,10 @@
+language: node_js
+node_js:
+  - node
+
+cache: yarn
+
+before_script:
+  - yarn global add gulp-cli
+
+script: gulp install
