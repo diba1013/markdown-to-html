@@ -15,7 +15,10 @@ const config = require("./config.json")
 
 const src = {
     markdown: `${config.root}`,
-    template: `${config.root}/assets/template.hbs`,
+    handlebars: {
+        partials: `${config.root}/assets/partials/**/*.hbs`,
+        template: `${config.root}/assets/template.hbs`,
+    },
     css: `${config.root}/assets/css/*.sass`,
     images: `${config.root}/assets/images/**`,
 }
@@ -126,13 +129,16 @@ function compileMarkdown(article) {
 function injectHTML(article) {
     return name(
         () => {
-            const template = gulp.src(src.template)
-                .pipe(handlebars()
-                    .data({
-                        title: article.title,
-                        name: article.name,
-                        content: read(`${out.raw}/${article.name}.html`),
-                    })) //
+            const engine = handlebars()
+                .partials(src.handlebars.partials)
+                .data({
+                    title: article.title,
+                    name: article.name,
+                    content: read(`${out.raw}/${article.name}.html`),
+                })
+
+            const template = gulp.src(src.handlebars.template)
+                .pipe(engine) //
                 .pipe(rename(`${article.name}.html`))
                 .pipe(gulp.dest(out.root))
 
