@@ -20,34 +20,6 @@ const src = {
     }
 }
 
-const categories = config.categories.map(category => {
-    const path = category.root || "."
-    const root = category.root ? `categories/${path}` : "src";
-    return {
-        name: category.name,
-        path: path,
-        root: root,
-        src: {
-            markdown: `${root}/*.md`,
-            css: `${root}/assets/css/*.sass`,
-            images: `${root}/assets/images/**`
-        },
-        out: {
-            css: `${config.out}/${path}/assets/css`,
-            images: `${config.out}/${path}/assets/images`
-        },
-        articles: category.files.map(article => {
-            return {
-                title: article.title,
-                name: article.name,
-                wip: article.wip,
-                src: `${root}/${article.name}.md`,
-                out: `${config.out}/${path}`
-            }
-        })
-    }
-})
-
 // Gulp pipeline options
 
 const options = {
@@ -77,6 +49,13 @@ const options = {
 }
 
 /* Tasks */
+
+function resolve(root, path) {
+    if (path) {
+        return root ? `${root}/${path}` : path
+    }
+    return root
+}
 
 function exists(path) {
     return fs.existsSync(path)
@@ -116,18 +95,65 @@ function clean(src, alt) {
     );
 }
 
+// Category
+
+function createCategory(root, category) {
+    const src = resolve(root.src, category.path || category.name);
+    const out = resolve(root.out, category.name);
+
+    const paths = {
+        src: resolve(src, config.category),
+        out: out
+    }
+
+    const categories = category.categories ? category.categories.map(c => createCategory(paths, c)) : undefined
+    const articles = category.files ? category.files.map(a => createArticle({ src: src, out: out }, a)) : undefined;
+
+    return {
+        name: category.name || "root",
+        path: out || "root",
+        src: {
+            css: resolve(src, "src/assets/css/*.sass"),
+            images: resolve(src, "src/assets/images/**")
+        },
+        out: {
+            css: resolve(config.out, resolve(out, "assets/css")),
+            images: resolve(config.out, resolve(out, "assets/images"))
+        },
+        articles: articles,
+        categories: categories,
+        data: {
+            logo: exists(resolve(src, "src/assets/images/logo.svg")) ? resolve(out, "assets/images/logo.svg") : `assets/images/logo.svg`,
+            path: out,
+            articles: articles ? articles.map(article => article.data) : undefined
+        }
+    }
+}
+
+function createArticle(root, article) {
+    return {
+        name: article.name,
+        src: resolve(root.src, `src/${article.name}.md`),
+        out: resolve(config.out, root.out),
+        data: {
+            title: article.title,
+            wip: article.wip
+        }
+    }
+}
+
 // Misc
 
 function copyImages(category) {
     return private(
-        `copy:img:${category.name}`,
+        `copy:img:${category.path}`,
         copy(category.src.images, category.out.images)
     );
 }
 
 function compileCSS(category) {
     return private(
-        `compile:css:${category.name}`,
+        `compile:css:${category.path}`,
         () => {
             return gulp.src(category.src.css)
                 .pipe(sass(options.sass))
@@ -137,18 +163,11 @@ function compileCSS(category) {
     );
 }
 
-function buildCategory(category) {
-    return gulp.parallel(
-        copyImages(category),
-        compileCSS(category)
-    )
-}
-
 // Markdown to HTML
 
 function compileMarkdown(category, article) {
     return private(
-        `compile:html:${category.name}:${article.name}`,
+        `compile:html:${category.path}:${article.name}`,
         () => {
             return gulp.src(article.src)
                 .pipe(markdown(options.markdown))
@@ -159,13 +178,13 @@ function compileMarkdown(category, article) {
 
 function injectHTML(category, article) {
     return private(
-        `build:html:${category.name}:${article.name}`,
+        `build:html:${category.path}:${article.name}`,
         () => {
             const engine = handlebars()
                 .partials(src.handlebars.partials)
                 .data({
-                    category: category,
-                    article: article,
+                    category: category.data,
+                    article: article.data,
                     server: config.server,
                     content: read(`${article.out}/raw/${article.name}.html`),
                 })
@@ -198,26 +217,32 @@ function buildMarkdown(category, article) {
     )
 }
 
-public("build:md", gulp.parallel(
-    categories.map(category => {
-        return gulp.parallel(
-            category.articles.map(article => {
-                return buildMarkdown(category, article)
-            })
+function flattenTasks(category) {
+    const tasks = [
+        gulp.parallel(
+            copyImages(category),
+            compileCSS(category)
         )
-    })
-))
+    ]
+
+    if (category.articles) {
+        tasks.push(gulp.parallel(
+            category.articles.map(article => buildMarkdown(category, article))
+        ))
+    }
+
+    if (category.categories) {
+        tasks.push(gulp.parallel(
+            category.categories.map(child => public(`build:${child.path}`, flattenTasks(child)))
+        ))
+    }
+    return gulp.series(tasks)
+}
 
 // Global
 
 public("clean", clean(config.out));
 
-public("build", gulp.series(
-    // Ensure these compiled files are available for markdown html
-    gulp.parallel(
-        categories.map(buildCategory)
-    ),
-    "build:md"
-));
+public("build", flattenTasks(createCategory({}, config)));
 
 public("install", gulp.series("clean", "build"));
