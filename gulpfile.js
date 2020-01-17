@@ -212,15 +212,6 @@ public("build:md", gulp.parallel(
 
 public("clean", clean(config.out));
 
-public("watch", () => {
-    return gulp.watch(
-        categories.map(category => category.src.markdown).concat([
-            src.template,
-            src.css,
-            src.images
-        ]), gulp.series("build"))
-});
-
 public("build", gulp.series(
     // Ensure these compiled files are available for markdown html
     gulp.parallel(
