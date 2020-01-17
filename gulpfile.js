@@ -94,6 +94,7 @@ function read(path) {
 function public(name, task) {
     gulp.task(name, task); // Note that this is deprecated, however, the actual usage below does not work
     //exports[name] = task;
+    return task;
 }
 
 function private(name, task) {
