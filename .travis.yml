@@ -13,6 +13,6 @@ deploy:
   provider: pages
   github_token: $GITHUB_TOKEN
   skip_cleanup: true
-  local_dir: markdown-to-html
+  local_dir: dist/markdown-to-html
   on:
     branch: master

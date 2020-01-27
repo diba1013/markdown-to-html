@@ -6,7 +6,6 @@ node_modules
 # Build directories
 dist
 out
-markdown-to-html
 
 # Ignore Yarn error logs
 yarn-error.log

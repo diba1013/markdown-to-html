@@ -1,6 +1,6 @@
 {
     "root": "src",
-    "out": "markdown-to-html",
+    "out": "dist/markdown-to-html",
     "server": {
         "path": "/markdown-to-html"
     },
