@@ -21,4 +21,4 @@ jobs:
         with:
           build_dir: dist/markdown-to-html
         env:
-          GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
