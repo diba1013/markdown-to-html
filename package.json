@@ -21,6 +21,7 @@
     "markdown-it": "^12.0.6",
     "markdown-it-attrs": "^4.0.0",
     "markdown-it-footnote": "^3.0.3",
-    "markdown-it-github-headings": "^2.0.0"
+    "markdown-it-github-headings": "^2.0.0",
+    "sass": "^1.35.1"
   }
 }

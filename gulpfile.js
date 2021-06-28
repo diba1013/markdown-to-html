@@ -3,7 +3,7 @@ const del = require("del")
 const rename = require("gulp-rename")
 const fs = require("fs");
 
-const sass = require("gulp-sass")
+const sass = require('gulp-sass')(require('sass'))
 const csso = require("gulp-csso")
 
 const markdown = require("gulp-markdownit")
